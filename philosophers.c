@@ -1,5 +1,10 @@
 #include "philosophers.h"
 
+void   check()
+{
+    printf("good\n");
+} 
+
 void *ft_thread(void *arg)
 {
     t_philo *philo;
@@ -7,26 +12,14 @@ void *ft_thread(void *arg)
     philo = (t_philo *)arg;
     while (1)
     {
-        if (philo->id == 5)
-        {
-            pthread_mutex_lock(&philo->ifo->mutex[5]);
-            pthread_mutex_lock(&philo->ifo->mutex[0]);
-            printf("eat %d\n", philo->id);
-            sleep(1);
-            pthread_mutex_unlock(&philo->ifo->mutex[5]);
-            pthread_mutex_unlock(&philo->ifo->mutex[0]);
-            sleep(1);
-        }
-        else
-        {
-            pthread_mutex_lock(&philo->ifo->mutex[philo->id]);
-            pthread_mutex_lock(&philo->ifo->mutex[philo->id+1]);
-            printf("eat %d\n", philo->id);
-            sleep(1);
-            pthread_mutex_unlock(&philo->ifo->mutex[philo->id]);
-            pthread_mutex_unlock(&philo->ifo->mutex[philo->id+1]);
-            sleep(1);
-        }
+        pthread_mutex_lock(&philo->ifo->mutex[philo->id]);
+        // printf()
+        pthread_mutex_lock(&philo->ifo->mutex[philo->id+1]);
+        printf("eat %d\n", philo->id);
+        sleep(1);
+        pthread_mutex_unlock(&philo->ifo->mutex[philo->id]);
+        pthread_mutex_unlock(&philo->ifo->mutex[philo->id+1]);
+        sleep(1);
     }
 
     return NULL;
