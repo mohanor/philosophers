@@ -1,6 +1,6 @@
 NAME = philo
 
-src = utils/utils.c utils/atoi.c philosophers.c
+src = utils/utils.c utils/utils_2.c utils/atoi.c philosophers.c
 
 
 obj = $(src:.c=.o)
@@ -12,7 +12,6 @@ all: $(NAME)
 
 $(NAME):  $(obj) philosophers.h
 	cc $(flags) $(obj) -o $(NAME)
-
 
 %.o: %.c philosophers.h
 	cc -c $< -o $@

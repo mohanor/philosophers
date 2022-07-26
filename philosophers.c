@@ -1,89 +1,120 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philosophers.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: matef <matef@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/07/26 13:05:44 by matef             #+#    #+#             */
+/*   Updated: 2022/07/26 18:49:07 by matef            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philosophers.h"
 
-void   check()
+void	ft_thread(void *vars)
 {
-    printf("good\n");
-} 
+	t_philo	*philo;
+	int		id;
 
-void *ft_thread(void *arg)
-{
-    t_philo *philo;
-
-    philo = (t_philo *)arg;
-    while (1)
-    {
-        pthread_mutex_lock(&philo->ifo->mutex[philo->id]);
-        // printf()
-        pthread_mutex_lock(&philo->ifo->mutex[philo->id+1]);
-        printf("eat %d\n", philo->id);
-        sleep(1);
-        pthread_mutex_unlock(&philo->ifo->mutex[philo->id]);
-        pthread_mutex_unlock(&philo->ifo->mutex[philo->id+1]);
-        sleep(1);
-    }
-
-    return NULL;
+	philo = (t_philo *)vars;
+	id = philo->id;
+	pthread_mutex_lock(&philo->tab->mtx[id]);
+	philo_print("has taken a fork", in_time(), id, philo);
+	pthread_mutex_lock(&philo->tab->mtx[(id + 1) % (philo->tab->nbr_philo)]);
+	philo_print("has taken a fork", in_time(), id, philo);
+	philo_print("is eating", in_time(), id, philo);
+	ft_uslep(philo->eat);
+	philo->start_time = in_time();
+	pthread_mutex_unlock(&philo->tab->mtx[id]);
+	pthread_mutex_unlock(&philo->tab->mtx[(id + 1) % (philo->tab->nbr_philo)]);
+	philo_print("is sleeping", in_time(), id, philo);
+	ft_uslep(philo->sleep);
+	philo_print("is thinking", in_time(), id, philo);
 }
 
-int main(int ac, char **av)
+void	*philosopher(void *var)
 {
-    pthread_t   *ids;
-    t_info      *t_nbr;
-    t_philo     *philo;
-    int i;
+	int			i;
+	t_philo		*philos;
 
-    t_nbr = (t_info *)malloc(sizeof(t_nbr));
-    if (!t_nbr)
-        return 0;
-    t_nbr->nbr_philo = ft_atoi(av[1]);
+	philos = (t_philo *)var;
+	i = 0;
+	if (philos->tab->numofarg == 5)
+	{
+		while (1)
+			ft_thread(philos);
+	}
+	else
+	{
+		while (i < philos->must_eat)
+		{
+			ft_thread(philos);
+			i++;
+		}
+		if (i == philos->must_eat)
+			philos->tab->staus = 1;
+	}
+	return (0);
+}
 
-    philo = (t_philo *)malloc(sizeof(t_philo) * t_nbr->nbr_philo);
-    if (!philo)
-        return 0;
+void	checker(t_philo *philo, int philo_nbr)
+{
+	int	i;
 
-    ids = (pthread_t *)malloc(sizeof(pthread_t) * t_nbr->nbr_philo);
-    if (!ids)
-        return 0;
+	i = 0;
+	while (i < philo_nbr)
+	{
+		if (in_time() - philo[i].start_time
+			> philo[i].die)
+		{
+			pthread_mutex_lock(&philo->tab->print);
+			if (philo[i].tab->staus == 0)
+				printf("[%ld]     philo %d  died\n", in_time() - philo->tab->in_start_time , philo->id);
+			break ;
+		}
+		i++;
+		if (i == philo_nbr)
+			i = 0;
+	}
+}
 
-    i = 0;
-    while (i < t_nbr->nbr_philo)
-    {
-        philo[i].id = i;
-        philo[i].ifo = t_nbr;
-        i++;
-    }
+void start_thread(t_philo *philo, pthread_t *ids, t_tab tab, int philo_nbr)
+{
+	int i;
 
-    t_nbr->mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * t_nbr->nbr_philo);
-    if (!t_nbr->mutex)
-        return 0;
+	tab.in_start_time = in_time();
+	i = 0;
+	while (i < philo_nbr)
+	{
+		philo[i].tab = &tab;
+		philo[i].start_time = in_time();
+		pthread_create(&ids[i], NULL, philosopher, &philo[i]);
+		usleep(500);
+		i++;
+	}
+}
 
-    i = 0;
-    while (i < t_nbr->nbr_philo)
-    {
-        if (pthread_mutex_init(&t_nbr->mutex[i], NULL) != 0)
-            return (1);
-        i++;
-    }
+int	main(int ac, char **av)
+{
+	int			i;
+	int			philo_nbr;
+	pthread_t	*ids;
+	t_philo		*philo;
+	t_tab		tab;
 
-    i = 0;
-    while (i < t_nbr->nbr_philo)
-    {
-        pthread_create(&ids[i], NULL, ft_thread, &philo[i]);
-        i++;
-        
-        usleep(500);
-    }
-
-    // printf("good\n");
-    while (1);
-
-
-    // pthread_mutex_init(t_mutex->mutex, NULL);  
-    //ids = (pthread_t *)malloc(sizeof(pthread_t) * t_nbr->nbr_philo);
-    //if (!ids)
-    //    return 0;
-
-    // pthread_mutex_destroy(t_mutex->mutex);
-    // ft_putnbr(t_mutex->nbr);
-    return (0);
+	if (ac != 5 && ac != 6)
+		return (0);
+	if (!parcing(av, ac))
+		return (0);
+	tab.numofarg = ac;
+	philo_nbr = ft_atoi(av[1]);
+	i = 0;
+	if (!init_func(&ids, &tab, &philo, philo_nbr))
+		return (0);
+	init_philo(av, philo, philo_nbr, ac);
+	start_thread(philo, ids, tab, philo_nbr);
+	checker(philo, philo_nbr);
+	free_parm(philo, tab.mtx, ids);
+	return (0);
 }
