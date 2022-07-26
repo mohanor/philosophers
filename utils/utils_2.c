@@ -6,7 +6,7 @@
 /*   By: matef <matef@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/26 13:19:06 by matef             #+#    #+#             */
-/*   Updated: 2022/07/26 18:49:16 by matef            ###   ########.fr       */
+/*   Updated: 2022/07/26 20:53:40 by matef            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,9 @@ void	philo_print(char *str, long time, int id, t_philo *philos)
 	return ;
 }
 
-void init_philo(char **av, t_philo	*philo, int philo_nbr, int ac)
+void	init_philo(char **av, t_philo	*philo, int philo_nbr, int ac)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < philo_nbr)
@@ -50,28 +50,28 @@ void init_philo(char **av, t_philo	*philo, int philo_nbr, int ac)
 	}
 }
 
-int	init_func(pthread_t	**ids, t_tab *tab, t_philo **philo, int philo_nbr)
+int	init_func(pthread_t	**ids, t_tab *tab, t_philo **philo, int n)
 {
 	int	i;
 
-	*ids = (pthread_t *)malloc(sizeof(pthread_t) * philo_nbr);
+	*ids = (pthread_t *)malloc(sizeof(pthread_t) * n);
 	if (!ids)
 		return (0);
-	tab->mtx = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * philo_nbr);
+	tab->mtx = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * n);
 	if (!tab->mtx)
 		return (0);
 	i = 0;
-	while (i < philo_nbr)
+	while (i < n)
 	{
 		if (pthread_mutex_init(&tab->mtx[i], NULL) != 0)
 			return (0);
 		i++;
 	}
-	*philo = (t_philo *)malloc(sizeof(t_philo) * philo_nbr);
+	*philo = (t_philo *)malloc(sizeof(t_philo) * n);
 	if (!philo)
 		return (0);
 	i = 0;
-	tab->nbr_philo = philo_nbr;
+	tab->nbr_philo = n;
 	tab->staus = 1;
 	if (pthread_mutex_init(&tab->print, NULL) != 0)
 		return (0);

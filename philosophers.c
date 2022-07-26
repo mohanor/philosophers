@@ -6,7 +6,7 @@
 /*   By: matef <matef@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/26 13:05:44 by matef             #+#    #+#             */
-/*   Updated: 2022/07/26 18:49:07 by matef            ###   ########.fr       */
+/*   Updated: 2022/07/26 20:49:18 by matef            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,10 @@ void	checker(t_philo *philo, int philo_nbr)
 		{
 			pthread_mutex_lock(&philo->tab->print);
 			if (philo[i].tab->staus == 0)
-				printf("[%ld]     philo %d  died\n", in_time() - philo->tab->in_start_time , philo->id);
+			{
+				printf("[%ld]	philo ", in_time() - philo->tab->in_start_time);
+				printf("%d died\n", philo->id);
+			}
 			break ;
 		}
 		i++;
@@ -79,9 +82,9 @@ void	checker(t_philo *philo, int philo_nbr)
 	}
 }
 
-void start_thread(t_philo *philo, pthread_t *ids, t_tab tab, int philo_nbr)
+void	start_thread(t_philo *philo, pthread_t *ids, t_tab tab, int philo_nbr)
 {
-	int i;
+	int	i;
 
 	tab.in_start_time = in_time();
 	i = 0;
